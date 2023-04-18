@@ -1,7 +1,7 @@
 # Clustering of musical patterns
 
 ## This script contains the code that created the datasets:
-## crotchets38i, quavers38ii, crotches38iii, crotchets99i, semiquavers99ii
+## crotchets38i, quavers38ii, crotchets38iii, crotchets99i, semiquavers99ii
 
 ### Libraries
 
@@ -270,7 +270,7 @@ semiquaver_fun99ii <- function(dataframe, performerName){
   return(performerName)
 }
 
-### Op. 38i crotches
+### Op. 38i crotchets
 
 CH <- crotchet_fun(CyH58crotchets,CH)
 DPB <- crotchet_fun(DPyBcrotchets,DPB)
@@ -293,34 +293,34 @@ RS <- crotchet_fun(RyScrotchets,RS)
 SB <- crotchet_fun(SyBcrotchets,SB)
 SS <- crotchet_fun(SyScrotchets,SS)
 
-crotches38i <- rbind(CH,DPB,FB,FvdP,GG,  GGr,GGu,IH,MA,MG,  ML,MP,PR36,PR66,PS,  PN,PV,RS,SB,SS)
+crotchets38i <- rbind(CH,DPB,FB,FvdP,GG,  GGr,GGu,IH,MA,MG,  ML,MP,PR36,PR66,PS,  PN,PV,RS,SB,SS)
 
 # Tidying the crotchet 38i dataset
 
-crotches38i$beat_1 <- crotches38i$V1
-crotches38i$beat_2 <- crotches38i$V2
-crotches38i$beat_3 <- crotches38i$V3
-crotches38i$beat_4 <- crotches38i$V4
+crotchets38i$beat_1 <- crotchets38i$V1
+crotchets38i$beat_2 <- crotchets38i$V2
+crotchets38i$beat_3 <- crotchets38i$V3
+crotchets38i$beat_4 <- crotchets38i$V4
 
-crotches38i$intensity_1 <- crotches38i$V5
-crotches38i$intensity_2 <- crotches38i$V6
-crotches38i$intensity_3 <- crotches38i$V7
-crotches38i$intensity_4 <- crotches38i$V8
-crotches38i$bar <- crotches38i$V9
+crotchets38i$intensity_1 <- crotchets38i$V5
+crotchets38i$intensity_2 <- crotchets38i$V6
+crotchets38i$intensity_3 <- crotchets38i$V7
+crotchets38i$intensity_4 <- crotchets38i$V8
+crotchets38i$bar <- crotchets38i$V9
 
-crotches38i$V1<-NULL
-crotches38i$V2<-NULL
-crotches38i$V3<-NULL
-crotches38i$V4<-NULL
-crotches38i$V5<-NULL
-crotches38i$V6<-NULL
-crotches38i$V7<-NULL
-crotches38i$V8<-NULL
-crotches38i$V9<-NULL
+crotchets38i$V1<-NULL
+crotchets38i$V2<-NULL
+crotchets38i$V3<-NULL
+crotchets38i$V4<-NULL
+crotchets38i$V5<-NULL
+crotchets38i$V6<-NULL
+crotchets38i$V7<-NULL
+crotchets38i$V8<-NULL
+crotchets38i$V9<-NULL
 
-crotches38i$bar <- as.factor(crotches38i$bar)
+crotchets38i$bar <- as.factor(crotchets38i$bar)
 
-write.csv(crotches38i, "C:/Users/samte/OneDrive/Desktop/crotches38i.csv", row.names=FALSE)
+write.csv(crotchets38i, "C:/Users/samte/OneDrive/Desktop/crotchets38i.csv", row.names=FALSE)
 
 ### Op. 38ii quavers
 
@@ -385,7 +385,7 @@ quavers38ii$bar <- as.factor(quavers38ii$bar)
 write.csv(quavers38ii, "C:/Users/samte/OneDrive/Desktop/quavers38ii.csv", row.names=FALSE)
 
 
-### Op. 38iii crotches
+### Op. 38iii crotchets
 
 CH <- crotchet_fun(CyH58crotchets,CH)
 DPB <- crotchet_fun(DPyBcrotchets,DPB)
@@ -408,37 +408,37 @@ RS <- crotchet_fun(RyScrotchets,RS)
 SB <- crotchet_fun(SyBcrotchets,SB)
 SS <- crotchet_fun(SyScrotchets,SS)
 
-crotches38iii <- rbind(CH,DPB,FB,FvdP,GG,  GGr,GGu,IH,MA,MG,  ML,MP,PR36,PR66,PS,  PN,PV,RS,SB,SS)
+crotchets38iii <- rbind(CH,DPB,FB,FvdP,GG,  GGr,GGu,IH,MA,MG,  ML,MP,PR36,PR66,PS,  PN,PV,RS,SB,SS)
 
 # Tidying the crotchet 38i dataset
 
-crotches38iii$beat_1 <- crotches38iii$V1
-crotches38iii$beat_2 <- crotches38iii$V2
-crotches38iii$beat_3 <- crotches38iii$V3
-crotches38iii$beat_4 <- crotches38iii$V4
+crotchets38iii$beat_1 <- crotchets38iii$V1
+crotchets38iii$beat_2 <- crotchets38iii$V2
+crotchets38iii$beat_3 <- crotchets38iii$V3
+crotchets38iii$beat_4 <- crotchets38iii$V4
 
-crotches38iii$intensity_1 <- crotches38iii$V5
-crotches38iii$intensity_2 <- crotches38iii$V6
-crotches38iii$intensity_3 <- crotches38iii$V7
-crotches38iii$intensity_4 <- crotches38iii$V8
-crotches38iii$bar <- crotches38iii$V9
+crotchets38iii$intensity_1 <- crotchets38iii$V5
+crotchets38iii$intensity_2 <- crotchets38iii$V6
+crotchets38iii$intensity_3 <- crotchets38iii$V7
+crotchets38iii$intensity_4 <- crotchets38iii$V8
+crotchets38iii$bar <- crotchets38iii$V9
 
-crotches38iii$V1<-NULL
-crotches38iii$V2<-NULL
-crotches38iii$V3<-NULL
-crotches38iii$V4<-NULL
-crotches38iii$V5<-NULL
-crotches38iii$V6<-NULL
-crotches38iii$V7<-NULL
-crotches38iii$V8<-NULL
-crotches38iii$V9<-NULL
+crotchets38iii$V1<-NULL
+crotchets38iii$V2<-NULL
+crotchets38iii$V3<-NULL
+crotchets38iii$V4<-NULL
+crotchets38iii$V5<-NULL
+crotchets38iii$V6<-NULL
+crotchets38iii$V7<-NULL
+crotchets38iii$V8<-NULL
+crotchets38iii$V9<-NULL
 
-crotches38iii$bar <- as.factor(crotches38iii$bar)
+crotchets38iii$bar <- as.factor(crotchets38iii$bar)
 
-write.csv(crotches38iii, "C:/Users/samte/OneDrive/Desktop/crotches38iii.csv", row.names=FALSE)
+write.csv(crotchets38iii, "C:/Users/samte/OneDrive/Desktop/crotchets38iii.csv", row.names=FALSE)
 
 
-### Op. 99i crotches
+### Op. 99i crotchets
 
 CH <- crotchet_fun99i(CyH36crotchets,CH)
 DPB <- crotchet_fun99i(DPyBcrotchets,DPB)
@@ -458,31 +458,31 @@ RS <- crotchet_fun99i(RyScrotchets,RS)
 SB <- crotchet_fun99i(SyBcrotchets,SB)
 SS <- crotchet_fun99i(SyScrotchets,SS)
 
-crotches99i <- rbind(CH,DPB,FB,GG,GGu,  IH,MA,MG,ML,PR66,  PN,PV,RS,SB,SS)
+crotchets99i <- rbind(CH,DPB,FB,GG,GGu,  IH,MA,MG,ML,PR66,  PN,PV,RS,SB,SS)
 
 # Tidying the crotchet 38i dataset
 
-crotches99i$beat_1 <- crotches99i$V1
-crotches99i$beat_2 <- crotches99i$V2
-crotches99i$beat_3 <- crotches99i$V3
+crotchets99i$beat_1 <- crotchets99i$V1
+crotchets99i$beat_2 <- crotchets99i$V2
+crotchets99i$beat_3 <- crotchets99i$V3
 
-crotches99i$intensity_1 <- crotches99i$V4
-crotches99i$intensity_2 <- crotches99i$V5
-crotches99i$intensity_3 <- crotches99i$V6
+crotchets99i$intensity_1 <- crotchets99i$V4
+crotchets99i$intensity_2 <- crotchets99i$V5
+crotchets99i$intensity_3 <- crotchets99i$V6
 
-crotches99i$bar <- crotches99i$V7
+crotchets99i$bar <- crotchets99i$V7
 
-crotches99i$V1<-NULL
-crotches99i$V2<-NULL
-crotches99i$V3<-NULL
-crotches99i$V4<-NULL
-crotches99i$V5<-NULL
-crotches99i$V6<-NULL
-crotches99i$V7<-NULL
+crotchets99i$V1<-NULL
+crotchets99i$V2<-NULL
+crotchets99i$V3<-NULL
+crotchets99i$V4<-NULL
+crotchets99i$V5<-NULL
+crotchets99i$V6<-NULL
+crotchets99i$V7<-NULL
 
-crotches99i$bar <- as.factor(crotches99i$bar)
+crotchets99i$bar <- as.factor(crotchets99i$bar)
 
-write.csv(crotches99i, "C:/Users/samte/OneDrive/Desktop/crotches99i.csv", row.names=FALSE)
+write.csv(crotchets99i, "C:/Users/samte/OneDrive/Desktop/crotchets99i.csv", row.names=FALSE)
 
 ### Op. 99ii semiquavers
 

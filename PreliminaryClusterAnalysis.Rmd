@@ -1,0 +1,327 @@
+---
+title: "Clustering of musical patterns"
+author: "Adriana Amaro"
+date: "2023-03-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(warn=-1)
+```
+
+
+```{r 1}
+library(plyr)
+library(readr)
+library(caret)
+library(ggfortify)
+library(recipes)
+library(embed)
+library(ggplot2)
+library(ggpubr)
+```
+
+# Preliminary cluster analysis
+
+## UMAPs
+
+```{r 2}
+#Datasets
+crotchets38i <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/crotchets38i.csv")
+quavers38ii <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/quavers38ii.csv")
+crotchets38iii <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/crotchets38iii.csv")
+crotchets99i <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/crotchets99i.csv")
+semiquavers99ii <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/semiquavers99ii.csv")
+
+```
+
+```{r 3, cache=TRUE}
+sinbar <- crotchets38i
+sinbar$bar <- NULL
+
+# Colors by performers
+uns_rec_prep <- recipe(performer ~ ., data = sinbar) |>
+  step_umap(all_predictors(), num_comp = 2) |>
+  prep()
+
+a<-bake(uns_rec_prep, new_data = sinbar, performer, starts_with("umap"))
+a$bar <- as.factor(crotchets38i$bar)
+
+a |> ggplot(aes(x = UMAP1, y = UMAP2, col = performer)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  coord_equal()
+
+
+```
+
+```{r 4,fig.dim=c(20,8), cache=TRUE}
+a|> ggplot(aes(x = UMAP1, y = UMAP2, col = bar)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "left") +
+  coord_equal()
+
+```
+
+```{r 5, cache=TRUE}
+sinbar <- quavers38ii
+sinbar$bar <- NULL
+
+# Colors by performers
+uns_rec_prep <- recipe(performer ~ ., data = sinbar) |>
+  step_umap(all_predictors(), num_comp = 2) |>
+  prep()
+
+a<-bake(uns_rec_prep, new_data = sinbar, performer, starts_with("umap"))
+a$bar <- as.factor(quavers38ii$bar)
+
+a |> ggplot(aes(x = UMAP1, y = UMAP2, col = performer)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  coord_equal()
+
+
+```
+
+```{r 6,fig.dim=c(20,8), cache=TRUE}
+a|> ggplot(aes(x = UMAP1, y = UMAP2, col = bar)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "left") +
+  coord_equal()
+
+```
+
+```{r 7, cache=TRUE}
+sinbar <- crotchets38iii
+sinbar$bar <- NULL
+
+# Colors by performers
+uns_rec_prep <- recipe(performer ~ ., data = sinbar) |>
+  step_umap(all_predictors(), num_comp = 2) |>
+  prep()
+
+a<-bake(uns_rec_prep, new_data = sinbar, performer, starts_with("umap"))
+a$bar <- as.factor(crotchets38iii$bar)
+
+a |> ggplot(aes(x = UMAP1, y = UMAP2, col = performer)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  coord_equal()
+
+```
+
+```{r 8,fig.dim=c(20,8), cache=TRUE}
+a|> ggplot(aes(x = UMAP1, y = UMAP2, col = bar)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "left") +
+  coord_equal()
+
+```
+
+```{r 9, cache=TRUE}
+sinbar <- crotchets99i
+sinbar$bar <- NULL
+
+# Colors by performers
+uns_rec_prep <- recipe(performer ~ ., data = sinbar) |>
+  step_umap(all_predictors(), num_comp = 2) |>
+  prep()
+
+a<-bake(uns_rec_prep, new_data = sinbar, performer, starts_with("umap"))
+a$bar <- as.factor(crotchets99i$bar)
+
+a |> ggplot(aes(x = UMAP1, y = UMAP2, col = performer)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  coord_equal()
+
+```
+
+```{r 10,fig.dim=c(20,8), cache=TRUE}
+a|> ggplot(aes(x = UMAP1, y = UMAP2, col = bar)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "left") +
+  coord_equal()
+
+```
+
+```{r 11, cache=TRUE}
+sinbar <- semiquavers99ii
+sinbar$bar <- NULL
+
+# Colors by performers
+uns_rec_prep <- recipe(performer ~ ., data = sinbar) |>
+  step_umap(all_predictors(), num_comp = 2) |>
+  prep()
+
+a<-bake(uns_rec_prep, new_data = sinbar, performer, starts_with("umap"))
+a$bar <- as.factor(semiquavers99ii$bar)
+
+a |> ggplot(aes(x = UMAP1, y = UMAP2, col = performer)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  coord_equal()
+
+```
+
+```{r 12,fig.dim=c(30,8), cache=TRUE}
+a|> ggplot(aes(x = UMAP1, y = UMAP2, col = bar)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "left") +
+  coord_equal()
+
+```
+
+## NbClust
+
+```{r 13,cache=TRUE}
+library(NbClust)
+multi <- crotchets99i[,2:7]
+nb99i<-NbClust(data = multi, diss = NULL, distance = "euclidean", min.nc = 2, max.nc = 10, 
+        method = "kmeans", index = "all", alphaBeale = 0.1)
+crotchets99i$nbclust <- nb99i$Best.partition
+
+cluster1 <- crotchets99i[crotchets99i$nbclust == 1,]
+cluster2 <- crotchets99i[crotchets99i$nbclust == 2,]
+
+table(cluster1$performer)
+table(cluster2$performer)
+
+prop <- numeric(15)
+for (i in 1:15){
+  a <- table(cluster2$performer)[i]
+  b <- table(cluster1$performer)[i]
+  prop[i] <- as.numeric(a)/(as.numeric(b)+as.numeric(a))
+}
+
+hist(cluster1$bar, breaks = 50)
+hist(cluster2$bar, breaks = 50)
+
+prop
+
+```
+
+```{r 14,cache=TRUE}
+multi <- crotchets38i[,2:9]
+nb38i<-NbClust(data = multi, diss = NULL, distance = "euclidean", min.nc = 2, max.nc = 10, 
+        method = "kmeans", index = "all", alphaBeale = 0.1)
+crotchets38i$nbclust <- nb38i$Best.partition
+
+cluster1 <- crotchets38i[crotchets38i$nbclust == 1,]
+cluster2 <- crotchets38i[crotchets38i$nbclust == 2,]
+
+table(cluster1$performer)
+table(cluster2$performer)
+
+prop <- numeric(15)
+for (i in 1:15){
+  a <- table(cluster2$performer)[i]
+  b <- table(cluster1$performer)[i]
+  prop[i] <- as.numeric(a)/(as.numeric(b)+as.numeric(a))
+}
+
+hist(cluster1$bar, breaks = 50)
+hist(cluster2$bar, breaks = 50)
+
+prop
+
+```
+
+## SOMs
+
+```{r 15,cache=TRUE}
+library(kohonen)
+som_grid <- somgrid(xdim = 20, ydim = 20, topo = "hexagonal")
+# Example: train the SOM for 100 iterations
+som_model <- som(X = as.matrix(crotchets99i[,2:7]), grid = som_grid, rlen = 100)
+plot(som_model)
+plot(som_model, type = "dist.neighbours", main = "U-Matrix for unsupervised SOM", keepMargins = TRUE, shape = "straight")
+
+som_model <- som(X = as.matrix(semiquavers99ii[,2:17]), grid = som_grid, rlen = 100)
+plot(som_model)
+plot(som_model, type = "dist.neighbours", main = "U-Matrix for unsupervised SOM", keepMargins = TRUE, shape = "straight")
+
+som_model <- som(X = as.matrix(crotchets38i[,2:9]), grid = som_grid, rlen = 100)
+plot(som_model)
+plot(som_model, type = "dist.neighbours", main = "U-Matrix for unsupervised SOM", keepMargins = TRUE, shape = "straight")
+
+som_model <- som(X = as.matrix(quavers38ii[,2:13]), grid = som_grid, rlen = 100)
+plot(som_model)
+plot(som_model, type = "dist.neighbours", main = "U-Matrix for unsupervised SOM", keepMargins = TRUE, shape = "straight")
+
+som_model <- som(X = as.matrix(crotchets38iii[,2:9]), grid = som_grid, rlen = 100)
+plot(som_model)
+plot(som_model, type = "dist.neighbours", main = "U-Matrix for unsupervised SOM", keepMargins = TRUE, shape = "straight")
+
+```
+
+## UMAPs with randomly paired bars as data
+
+```{r 16,cache=TRUE}
+unor38i <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/unor38i.csv")
+unor38iii <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/unor38iii.csv")
+
+united <- rbind(unor38i,unor38iii)
+
+
+```
+
+```{r 17,cache=TRUE}
+sinbar <- united
+sinbar$bars <- NULL
+
+```
+
+```{r 18,cache=TRUE}
+uns_rec_prep <- recipe(performer ~ ., data = sinbar) |>
+  step_umap(all_predictors(), num_comp = 2) |>
+  prep()
+
+bake(uns_rec_prep, new_data = sinbar, performer, starts_with("umap"))|>
+  ggplot(aes(x = UMAP1, y = UMAP2, col = performer)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  coord_equal()
+
+```
+
+```{r 19,cache=TRUE}
+uns_rec_prep <- recipe(performer ~ ., data = unor38i[,1:17]) |>
+  step_umap(all_predictors(), num_comp = 2) |>
+  prep()
+
+bake(uns_rec_prep, new_data = unor38i[,1:17], performer, starts_with("umap"))|>
+  ggplot(aes(x = UMAP1, y = UMAP2, col = performer)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  coord_equal()
+
+```
+
+```{r 20,cache=TRUE}
+uns_rec_prep <- recipe(performer ~ ., data = unor38iii[,1:17]) |>
+  step_umap(all_predictors(), num_comp = 2) |>
+  prep()
+
+bake(uns_rec_prep, new_data = unor38iii[,1:17], performer, starts_with("umap"))|>
+  ggplot(aes(x = UMAP1, y = UMAP2, col = performer)) +
+  geom_point(alpha = .5) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  coord_equal()
+
+```
+

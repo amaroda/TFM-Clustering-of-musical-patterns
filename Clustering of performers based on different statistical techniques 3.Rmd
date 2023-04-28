@@ -1,0 +1,583 @@
+---
+title: "Clustering of performers based on different statistical techniques"
+author: "Adriana Amaro"
+date: "2023-04-27"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Preliminary analysis for movement Op.38i
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+library(dplyr)
+library(ggpubr)
+library(embed)
+library(NbClust)
+library(factoextra)
+```
+
+```{r ,echo=F}
+vc38i <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/vc38i.csv")
+tc38i <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/tc38i.csv")
+
+notes.cello38i <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/notes.cello38i.csv")
+tcello <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/tcello.csv")
+
+notes.piano38i <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/notes.piano38i.csv")
+tpiano <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/tpiano.csv")
+
+tbeats <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/tbeats.csv")
+tintensity <- read.csv("C:/Users/samte/OneDrive/Desktop/TFM Clustering of musical patterns/curatedData/tintensity.csv")
+
+```
+
+
+```{r , include=F}
+head(vc38i, n=5)
+head(select(tc38i, c(1:8,2161)))
+
+head(select(notes.cello38i, c(1:7,938)))
+head(tcello)
+
+head(select(notes.piano38i, c(1:7,1696)))
+head(tpiano)
+
+```
+
+# Pearson correlations between performers
+
+## Beat proportions and intensity fluctuations (both performers)
+
+```{r, echo=F}
+cor(vc38i)
+```
+
+## Note length (cellists)
+
+```{r, echo=F}
+cor(tcello)
+```
+
+### Note length (pianinsts)
+
+```{r, echo=F}
+cor(tpiano)
+```
+
+# Cluster analysis of performers by beat and intensity (both)
+
+## PCA
+
+```{r, echo=F}
+pca <- prcomp(tc38i[,1:2160], center = T, scale. = T)
+summary(pca)
+tc38i.pca <- pca$x
+tc38i.pca <- as.data.frame(tc38i.pca)
+tc38i.pca$performers <- tc38i$performers
+rownames(tc38i.pca) <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+rownames(tc38i) <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+```
+
+### Plot of performers in PCA components
+
+```{r, echo=F}
+ggscatter(tc38i.pca, x = "PC1", y = "PC2", 
+          label = tc38i.pca$performers,
+          size = 0.5)
+```
+
+### Plot of beat vs intensity (PC1 beat variables, PC1 intensity variables)
+
+```{r, echo=F}
+pcab<-prcomp(tbeats[,1:1080], center = T, scale. = T)
+#summary(pcab)
+beats.pca<-as.data.frame(pcab$x)
+beats.pca$performers <- tc38i$performers
+rownames(tbeats) <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+
+pcai<-prcomp(tintensity[,1:1080], center = T, scale. = T)
+#summary(pcai)
+intensity.pca<-as.data.frame(pcai$x)
+intensity.pca$performers <- tc38i$performers
+rownames(tintensity) <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+
+merge <- cbind(beats.pca[,1],intensity.pca[,1])
+merge <- as.data.frame(merge)
+
+merge$PC1.beats <- merge$V1
+merge$PC1.intensity <- merge$V2
+merge$V1 <- NULL
+merge$V2 <- NULL
+merge$performers <- tbeats$performers
+
+ggscatter(merge[,1:2], x = "PC1.beats", y = "PC1.intensity", 
+          label = merge$performers,
+          size = 0.5)
+
+```
+
+## UMAP
+
+```{r, echo=F}
+uns_rec_prep <- recipe(performers ~ ., data = tc38i.pca) |>
+  step_umap(all_predictors(), num_comp = 2) |>
+  prep()
+
+
+a<-bake(uns_rec_prep, new_data = tc38i.pca, performers, starts_with("umap"))
+a<-as_tibble(a)
+colnames(a) <- c("performers","UMAP.1", "UMAP.2")
+ggscatter(a[,2:3], x = "UMAP.1", y = "UMAP.2", 
+          label = a$performers,
+          size = 0.5)
+
+
+```
+
+Very unstable, changes every time it's run significantly.
+
+## K-means
+
+```{r, eval=F,echo=FALSE}
+nb99i<-NbClust(data = tc38i.pca[,1:10], diss = NULL, distance = "euclidean", min.nc = 3, max.nc = 10, 
+               method = "kmeans", index = "all", alphaBeale = 0.1)
+fviz_nbclust(scale(tc38i[,1:2160]),kmeans,method="silhouette") 
+fviz_nbclust(scale(tc38i[,1:2160]),kmeans,method="wss")
+
+```
+
+### 10 clusters beat+intensity
+
+```{r, echo=F}
+# 10 clusters
+# Optimal cluster composition
+
+m <- matrix(,nrow = 10, ncol=100)
+n <- matrix(,nrow = 100, ncol=20)
+a <- 0
+for (i in 1:100){
+  a <- kmeans(scale(tc38i[,1:2160]), centers = 10,iter.max = 100000)
+  m[,i] <- a$withinss
+  n[i,] <- a$cluster
+
+}
+
+tc38i.pca$cluster <- as.factor(n[which.min(colSums(m)),])
+
+ggplot(tc38i.pca, aes(x = PC1, y = PC2, color = cluster, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2) 
+
+
+
+```
+
+
+```{r, eval=F, echo=FALSE}
+nb99i<-NbClust(data = beats.pca[,1:10], diss = NULL, distance = "euclidean", min.nc = 3, max.nc = 10, 
+               method = "kmeans", index = "all", alphaBeale = 0.1)
+fviz_nbclust(tbeats[,1:1080],kmeans,method="silhouette") 
+fviz_nbclust(tbeats[,1:1080],kmeans,method="wss")
+```
+
+### 10 clusters beat variables
+
+```{r, echo=F}
+# 10 clusters
+# Optimal cluster composition
+
+m <- matrix(,nrow = 10, ncol=100)
+n <- matrix(,nrow = 100, ncol=20)
+a <- 0
+for (i in 1:100){
+  a <- kmeans(tbeats[,1:1080], centers = 10,iter.max = 100000)
+  m[,i] <- a$withinss
+  n[i,] <- a$cluster
+
+}
+
+ 
+merge$cluster.b <- as.factor(n[which.min(colSums(m)),])
+
+ggplot(merge, aes(x = PC1.beats, y = PC1.intensity, color = cluster.b, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2)
+```
+
+```{r, eval=FALSE, echo=FALSE}
+nb99i<-NbClust(data = intensity.pca[,1:10], diss = NULL, distance = "euclidean", min.nc = 3, max.nc = 10, 
+               method = "kmeans", index = "all", alphaBeale = 0.1)
+fviz_nbclust(tintensity[,1:1080],kmeans,method="silhouette") 
+fviz_nbclust(tintensity[,1:1080],kmeans,method="wss")
+```
+
+### 10 clusters intensity variables
+
+```{r, echo=F}
+# 10 clusters
+m <- matrix(,nrow = 10, ncol=100)
+n <- matrix(,nrow = 100, ncol=20)
+a <- 0
+for (i in 1:100){
+  a <- kmeans(tintensity[,1:1080], centers = 10,iter.max = 100000)
+  m[,i] <- a$withinss
+  n[i,] <- a$cluster
+
+}
+
+merge$cluster.i <- as.factor(n[which.min(colSums(m)),])
+
+ggplot(merge, aes(x = PC1.beats, y = PC1.intensity, color = cluster.i, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2)
+```
+
+## Dendograms
+
+### Dendograms beat+intensity
+
+```{r, echo=F}
+# calculate the distance matrix
+dist_matrix <- dist(scale(tc38i[,1:2160]))
+
+# perform hierarchical clustering
+hc1 <- hclust(dist_matrix, method = "ward.D")
+hc2 <- hclust(dist_matrix, method = "ward.D2")
+hc3 <- hclust(dist_matrix, method = "complete")
+hc4 <- hclust(dist_matrix, method = "average")
+plot(hc1)
+plot(hc2)
+plot(hc3)
+plot(hc4)
+
+```
+
+### Dendograms beat
+
+```{r, echo=F}
+# calculate the distance matrix
+dist_matrix <- dist(scale(tbeats[,1:1080]))
+
+# perform hierarchical clustering
+hc1 <- hclust(dist_matrix, method = "ward.D")
+hc2 <- hclust(dist_matrix, method = "ward.D2")
+hc3 <- hclust(dist_matrix, method = "complete")
+hc4 <- hclust(dist_matrix, method = "average")
+plot(hc1)
+plot(hc2)
+plot(hc3)
+plot(hc4)
+
+```
+
+### Dendograms intensity
+
+```{r, echo=F}
+# calculate the distance matrix
+dist_matrix <- dist(scale(tintensity[,1:1080]))
+
+# perform hierarchical clustering
+hc1 <- hclust(dist_matrix, method = "ward.D")
+hc2 <- hclust(dist_matrix, method = "ward.D2")
+hc3 <- hclust(dist_matrix, method = "complete")
+hc4 <- hclust(dist_matrix, method = "average")
+plot(hc1)
+plot(hc2)
+plot(hc3)
+plot(hc4)
+
+```
+
+# Cluster analysis for cellists (note length)
+
+## PCA
+
+```{r, echo=F}
+pca <- prcomp(notes.cello38i[,1:937], center = T, scale. = T)
+summary(pca)
+nc.pca <- pca$x
+nc.pca <- as.data.frame(nc.pca)
+nc.pca$performers <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+rownames(nc.pca) <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+rownames(notes.cello38i) <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+```
+
+### Plot of performers in PCA components
+
+```{r, echo=F}
+ggscatter(nc.pca, x = "PC1", y = "PC2", 
+          label = nc.pca$performers,
+          size = 0.5)
+
+```
+
+## K-means
+
+```{r, include=F, echo=FALSE}
+nb99i<-NbClust(data = nc.pca[,1:10], diss = NULL, distance = "euclidean", min.nc = 3, max.nc = 10, 
+               method = "kmeans", index = "all", alphaBeale = 0.1)
+fviz_nbclust(scale(notes.cello38i[,1:937]),kmeans,method="silhouette") 
+fviz_nbclust(scale(notes.cello38i[,1:937]),kmeans,method="wss")
+```
+
+### 9 clusters cellists
+
+```{r, echo=F}
+# 9 clusters
+m <- matrix(,nrow = 9, ncol=100)
+n <- matrix(,nrow = 100, ncol=20)
+a <- 0
+for (i in 1:100){
+  a <- kmeans(scale(notes.cello38i[,1:937]), centers = 9,iter.max = 100000)
+  m[,i] <- a$withinss
+  n[i,] <- a$cluster
+
+}
+
+nc.pca$cluster.9 <- as.factor(n[which.min(colSums(m)),])
+
+ggplot(nc.pca, aes(x = PC1, y = PC2, color = cluster.9, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2) 
+
+ggplot(nc.pca[-c(8,15),], aes(x = PC1, y = PC2, color = cluster.9, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2) 
+
+```
+
+### 3 clusters cellists
+
+```{r, echo=FALSE}
+
+# 3 clusters
+m <- matrix(,nrow = 3, ncol=100)
+n <- matrix(,nrow = 100, ncol=20)
+a <- 0
+for (i in 1:100){
+  a <- kmeans(scale(notes.cello38i[,1:937]), centers = 3,iter.max = 100000)
+  m[,i] <- a$withinss
+  n[i,] <- a$cluster
+
+}
+
+nc.pca$cluster.3 <- as.factor(n[which.min(colSums(m)),])
+
+ggplot(nc.pca, aes(x = PC1, y = PC2, color = cluster.3, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2)  
+
+```
+
+### 6 clusters cellists
+
+```{r, echo=FALSE}
+
+# 6 clusters
+m <- matrix(,nrow = 6, ncol=100)
+n <- matrix(,nrow = 100, ncol=20)
+a <- 0
+for (i in 1:100){
+  a <- kmeans(scale(notes.cello38i[,1:937]), centers = 6,iter.max = 100000)
+  m[,i] <- a$withinss
+  n[i,] <- a$cluster
+
+}
+
+nc.pca$cluster.6 <- as.factor(n[which.min(colSums(m)),])
+
+ggplot(nc.pca, aes(x = PC1, y = PC2, color = cluster.6, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2)
+
+ggplot(nc.pca[-c(8,15),], aes(x = PC1, y = PC2, color = cluster.6, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2)
+```
+
+## Dendograms cellists
+
+```{r, echo=F}
+# calculate the distance matrix
+dist_matrix <- dist(scale(notes.cello38i[,1:937]))
+
+# perform hierarchical clustering
+hc1 <- hclust(dist_matrix, method = "ward.D")
+hc2 <- hclust(dist_matrix, method = "ward.D2")
+hc3 <- hclust(dist_matrix, method = "complete")
+hc4 <- hclust(dist_matrix, method = "average")
+
+plot(hc1)
+plot(hc2)
+plot(hc3)
+plot(hc4)
+
+```
+
+# Cluster analysis for pianists (note length)
+
+## PCA
+
+```{r, echo=F}
+pca <- prcomp(notes.piano38i[,1:937], center = T, scale. = T)
+summary(pca)
+np.pca <- pca$x
+np.pca <- as.data.frame(np.pca)
+np.pca$performers <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+rownames(np.pca) <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+rownames(notes.piano38i) <- c("CH","DPB" ,"FB" ,"FvdP" ,"GG" ,"GGr" ,"GGu" ,"IH" ,"MA","MG",
+            "ML" ,"MP" ,"PN" ,"PR36" ,"PR66" ,"PS" ,"PV" ,"RS" ,"SB" ,"SS")
+```
+
+### Plot of pianists given by PCA components
+
+```{r, echo=F}
+ggscatter(np.pca, x = "PC1", y = "PC2", 
+          label = np.pca$performers,
+          size = 0.5)
+
+```
+
+## K-means
+
+```{r, include=F, echo=FALSE}
+nb99i<-NbClust(data = np.pca[,1:10], diss = NULL, distance = "euclidean", min.nc = 3, max.nc = 10, 
+               method = "kmeans", index = "all", alphaBeale = 0.1)
+fviz_nbclust(scale(notes.piano38i[,1:1695]),kmeans,method="silhouette") 
+fviz_nbclust(scale(notes.piano38i[,1:1695]),kmeans,method="wss")
+```
+
+### 3 clusters pianists
+
+```{r, echo=F}
+# 3 clusters
+m <- matrix(,nrow = 3, ncol=100)
+n <- matrix(,nrow = 100, ncol=20)
+a <- 0
+for (i in 1:100){
+  a <- kmeans(scale(notes.piano38i[,1:1695]), centers = 3,iter.max = 100000)
+  m[,i] <- a$withinss
+  n[i,] <- a$cluster
+
+}
+
+np.pca$cluster.3 <- as.factor(n[which.min(colSums(m)),])
+
+ggplot(np.pca, aes(x = PC1, y = PC2, color = cluster.3, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2) 
+
+ggplot(np.pca[-8,], aes(x = PC1, y = PC2, color = cluster.3, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2)  
+
+```
+
+### 9 clusters pianists
+
+```{r, echo=FALSE}
+
+
+# 9 clusters
+m <- matrix(,nrow = 9, ncol=100)
+n <- matrix(,nrow = 100, ncol=20)
+a <- 0
+for (i in 1:100){
+  a <- kmeans(notes.piano38i[,1:1695], centers = 9,iter.max = 100000)
+  m[,i] <- a$withinss
+  n[i,] <- a$cluster
+
+}
+
+np.pca$cluster.9 <- as.factor(n[which.min(colSums(m)),])
+
+ggplot(np.pca, aes(x = PC1, y = PC2, color = cluster.9, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2)  
+
+ggplot(np.pca[-8,], aes(x = PC1, y = PC2, color = cluster.9, label = performers)) +
+  geom_point() +
+  geom_text(nudge_y = 0.2)
+```
+
+## Dendograms pianists
+
+```{r, echo=F}
+# calculate the distance matrix
+dist_matrix <- dist(scale(notes.piano38i[,1:1695]))
+
+# perform hierarchical clustering
+hc1 <- hclust(dist_matrix, method = "ward.D")
+hc2 <- hclust(dist_matrix, method = "ward.D2")
+hc3 <- hclust(dist_matrix, method = "complete")
+hc4 <- hclust(dist_matrix, method = "average")
+
+plot(hc1)
+plot(hc2)
+plot(hc3)
+plot(hc4)
+
+```
+
+# Summary
+
+PV-SS always together. Also PR36-PR66.
+
+FvdP different in intensity, MG different in beat.
+
+## Clusters:
+
+### beat + intensity
+
+SB-IH-MP-GGu-GG-GGr
+MA-PN-ML
+PV-SS
+DPB-FB
+PR36-PR66
+FvdP
+MG
+PS
+RS
+CH
+
+### beat
+
+IH-MA-GG-PN
+MP-GGu-GGr-RS
+FvdP-FB-SB
+PV-SS
+PR36-PR66
+PS
+DPB
+ML
+MG
+CH
+
+
+### intensity
+
+GG-GGu-GGr-ML   
+MP-MA-PN   
+SB-IH-MG   
+PV-SS
+PR36-PR66
+PS-CH
+FvdP
+FB
+PS
+CH
+

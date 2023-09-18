@@ -1,6 +1,6 @@
 # TFM-Clustering-of-musical-patterns
 
-This GitHub repository is where the code of the analyses in the master's thesis ``Clustering of performances and musical patterns in Brahms's cello sonatas'' is located. 
+Code of the analyses of the master's thesis ``Clustering of performances and musical patterns in Brahms's cello sonatas''. 
 Written by Adriana Amaro Rodríguez and supervised by Eduardo García Portugués and Ana Llorens Martín.
 
 ABSTRACT
